@@ -1,0 +1,30 @@
+# Data - NEVER commit. The Ausgrid archive is hundreds of MB and is
+# publicly redistributable only under Ausgrid's own terms. Document how to
+# obtain it in README.md instead of committing it.
+data/raw/
+data/processed/
+data/external/
+*.csv
+*.parquet
+
+# Trained models and large outputs
+results/models/
+*.h5
+*.pt
+*.pth
+*.pkl
+*.joblib
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
