@@ -50,7 +50,9 @@ def quality_report(cfg: Config, df: pd.DataFrame) -> pd.DataFrame:
             "regular_steps_pct": round(100 * (gaps == step).mean(), 2),
             "largest_gap_hours": round(gaps.max().total_seconds() / 3600, 1),
             "null_load": int(g["load_mw"].isna().sum()),
-            "nonpositive_load": int((g["load_mw"] <= 0).sum()),
+            "reverse_flow_hours": int((g["load_mw"] < 0).sum()),
+            "reverse_flow_pct": round(100 * (g["load_mw"] < 0).mean(), 2),
+            "min_mw": round(g["load_mw"].min(), 3),
             "mean_mw": round(g["load_mw"].mean(), 3),
             "max_mw": round(g["load_mw"].max(), 3),
         })
@@ -227,10 +229,20 @@ def flag_outliers(cfg: Config, df: pd.DataFrame) -> pd.DataFrame:
     df["is_outlier"] = (df.groupby("substation")["load_mw"]
                           .transform(_flag)
                           .astype(bool))
-    df["is_outlier"] |= df["load_mw"].le(0).fillna(False)
+    # Negative and near-zero load are NOT errors. High rooftop-PV penetration
+    # makes zone substations export power back to the network around the solar
+    # peak, so net load legitimately goes negative. Flagging these as outliers
+    # would delete exactly the minimum-demand hours that drive reverse-flow
+    # and voltage-rise concerns in modern distribution networks.
+    df["is_reverse_flow"] = df["load_mw"].lt(0).fillna(False)
 
     log(cfg, "outliers", f"flagged {int(df['is_outlier'].sum()):,} points "
                          f"({100 * df['is_outlier'].mean():.2f}%)")
+    rf = int(df["is_reverse_flow"].sum())
+    if rf:
+        log(cfg, "outliers", f"{rf:,} reverse-flow hours retained "
+                             f"({100 * df['is_reverse_flow'].mean():.2f}%) - "
+                             f"rooftop PV export, not errors")
     return df
 
 
