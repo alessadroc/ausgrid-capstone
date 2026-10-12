@@ -197,6 +197,20 @@ def main() -> int:
             res[c] = pd.DataFrame(all_rows)[c].values
     res.to_csv(METDIR / "arima_results.csv", index=False)
 
+    # Save per-timestamp predictions so later models can be tested against
+    # ARIMA on exactly the same targets with the Diebold-Mariano test.
+    pred_rows = []
+    for (sub, h, label), (a, p) in all_stored.items():
+        if label != "ARIMA":
+            continue
+        pred_rows.append(pd.DataFrame({"timestamp": p.index, "substation": sub,
+                                       "horizon_h": h, "prediction": p.values,
+                                       "actual": a.reindex(p.index).values}))
+    if pred_rows:
+        pd.concat(pred_rows, ignore_index=True).to_csv(
+            METDIR / "arima_predictions.csv", index=False)
+        print(f"-> {METDIR}/arima_predictions.csv")
+
     for h in horizons:
         plot(all_stored, subs[-1], h)
 
