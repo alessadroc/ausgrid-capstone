@@ -1,12 +1,3 @@
-# Data - NEVER commit. The Ausgrid archive is hundreds of MB and is
-# publicly redistributable only under Ausgrid's own terms. Document how to
-# obtain it in README.md instead of committing it.
-data/raw/
-data/processed/
-data/external/
-*.csv
-*.parquet
-
 # Trained models and large outputs
 results/models/
 *.h5

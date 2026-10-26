@@ -1,0 +1,4 @@
+substation,adf_statistic,p_value,lags_used,n_obs,crit_5pct,stationary_at_5pct,suggested_d
+Telarah 33_11kV,-9.0578,0.0,46,19953,-2.8617,True,0
+Hurstville North 132_11kV,-8.5207,0.0,45,19954,-2.8617,True,0
+West Gosford 132_11kV,-11.1244,0.0,46,19953,-2.8617,True,0
