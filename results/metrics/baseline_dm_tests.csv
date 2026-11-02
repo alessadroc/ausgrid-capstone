@@ -1,19 +1,19 @@
 substation,horizon_h,model_A,model_B,dm_statistic,p_value,verdict,n
-Telarah 33_11kV,1,seasonal_naive_daily(lag=24h),persistence(lag=1h),12.607621100048132,0.0,B better,3033
-Telarah 33_11kV,1,seasonal_naive_weekly(lag=168h),persistence(lag=1h),19.726173753817157,0.0,B better,3033
-Telarah 33_11kV,1,drift_adjusted_seasonal,persistence(lag=1h),21.39026758205982,0.0,B better,3033
+Telarah 33_11kV,1,seasonal_naive_daily(lag=24h),persistence(lag=1h),12.607290587991141,0.0,B better,3033
+Telarah 33_11kV,1,seasonal_naive_weekly(lag=168h),persistence(lag=1h),19.72578382203506,0.0,B better,3033
+Telarah 33_11kV,1,drift_adjusted_seasonal,persistence(lag=1h),21.3898395735896,0.0,B better,3033
 Telarah 33_11kV,24,seasonal_naive_daily(lag=24h),persistence(lag=24h),0.0,1.0,no significant difference,3033
-Telarah 33_11kV,24,seasonal_naive_weekly(lag=168h),persistence(lag=24h),4.038520473061669,5.5122547739649974e-05,B better,3033
-Telarah 33_11kV,24,drift_adjusted_seasonal,persistence(lag=24h),4.65740807936485,3.339896955889543e-06,B better,3033
-Hurstville North 132_11kV,1,seasonal_naive_daily(lag=24h),persistence(lag=1h),14.468303493153156,0.0,B better,3056
-Hurstville North 132_11kV,1,seasonal_naive_weekly(lag=168h),persistence(lag=1h),21.5856704907,0.0,B better,3056
-Hurstville North 132_11kV,1,drift_adjusted_seasonal,persistence(lag=1h),23.44742725640936,0.0,B better,3056
+Telarah 33_11kV,24,seasonal_naive_weekly(lag=168h),persistence(lag=24h),4.038531675453697,5.511992993789683e-05,B better,3033
+Telarah 33_11kV,24,drift_adjusted_seasonal,persistence(lag=24h),4.657437904753731,3.3394167329170443e-06,B better,3033
+Hurstville North 132_11kV,1,seasonal_naive_daily(lag=24h),persistence(lag=1h),14.468838293836956,0.0,B better,3056
+Hurstville North 132_11kV,1,seasonal_naive_weekly(lag=168h),persistence(lag=1h),21.586915059750254,0.0,B better,3056
+Hurstville North 132_11kV,1,drift_adjusted_seasonal,persistence(lag=1h),23.448242309804005,0.0,B better,3056
 Hurstville North 132_11kV,24,seasonal_naive_daily(lag=24h),persistence(lag=24h),0.0,1.0,no significant difference,3056
-Hurstville North 132_11kV,24,seasonal_naive_weekly(lag=168h),persistence(lag=24h),3.5906120501093315,0.0003350958813244098,B better,3056
-Hurstville North 132_11kV,24,drift_adjusted_seasonal,persistence(lag=24h),4.790885766831745,1.7396385585399798e-06,B better,3056
-West Gosford 132_11kV,1,seasonal_naive_daily(lag=24h),persistence(lag=1h),17.79141827298841,0.0,B better,3056
-West Gosford 132_11kV,1,seasonal_naive_weekly(lag=168h),persistence(lag=1h),20.085088773443754,0.0,B better,3056
-West Gosford 132_11kV,1,drift_adjusted_seasonal,persistence(lag=1h),21.938249726607054,0.0,B better,3056
+Hurstville North 132_11kV,24,seasonal_naive_weekly(lag=168h),persistence(lag=24h),3.5908532479271242,0.00033478720940416373,B better,3056
+Hurstville North 132_11kV,24,drift_adjusted_seasonal,persistence(lag=24h),4.79101625825082,1.7385158543881118e-06,B better,3056
+West Gosford 132_11kV,1,seasonal_naive_daily(lag=24h),persistence(lag=1h),17.787224755687927,0.0,B better,3056
+West Gosford 132_11kV,1,seasonal_naive_weekly(lag=168h),persistence(lag=1h),20.085114176085863,0.0,B better,3056
+West Gosford 132_11kV,1,drift_adjusted_seasonal,persistence(lag=1h),21.93821291477353,0.0,B better,3056
 West Gosford 132_11kV,24,seasonal_naive_daily(lag=24h),persistence(lag=24h),0.0,1.0,no significant difference,3056
-West Gosford 132_11kV,24,seasonal_naive_weekly(lag=168h),persistence(lag=24h),2.4774371990406476,0.013286669466183731,B better,3056
-West Gosford 132_11kV,24,drift_adjusted_seasonal,persistence(lag=24h),3.6844694045400987,0.00023315616626318203,B better,3056
+West Gosford 132_11kV,24,seasonal_naive_weekly(lag=168h),persistence(lag=24h),2.4784963562114513,0.013247367543529398,B better,3056
+West Gosford 132_11kV,24,drift_adjusted_seasonal,persistence(lag=24h),3.6856162150442033,0.00023211334966632968,B better,3056

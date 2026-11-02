@@ -123,11 +123,12 @@ def peak_error(actual, predicted, quantile: float = 0.95) -> dict:
     a, p = _clean(actual, predicted)
     m = peak_mask(a, quantile)
     if m.sum() == 0:
-        return {"peak_MAE": float("nan"), "peak_RMSE": float("nan"), "n_peak": 0}
+        return {"peak_MAE": float("nan"), "peak_RMSE": float("nan"),
+                "n_peak_quantile": 0}
     return {"peak_MAE": mae(a[m], p[m]),
             "peak_RMSE": rmse(a[m], p[m]),
             "peak_threshold_MW": float(np.nanquantile(a, quantile)),
-            "n_peak": int(m.sum())}
+            "n_peak_quantile": int(m.sum())}
 
 
 # Southern-hemisphere summer evening peak: the window a network operator
@@ -187,7 +188,7 @@ def peak_bias(actual, predicted, timestamps=None, quantile: float = 0.95,
 
     a, p = a[keep], p[keep]
     if m.sum() == 0:
-        return {"underestimation_rate": float("nan"), "n_peak": 0,
+        return {"underestimation_rate": float("nan"), "n_peak_window": 0,
                 "peak_definition": definition}
 
     under = int(np.sum(p[m] < a[m]))
@@ -201,7 +202,7 @@ def peak_bias(actual, predicted, timestamps=None, quantile: float = 0.95,
             "biased_low": bool(rate > 0.5 and pval < 0.05
                                and timestamps is not None),
             "peak_definition": definition,
-            "n_peak": n}
+            "n_peak_window": n}
 
 
 # ---------------------------------------------------------------------------
@@ -291,5 +292,6 @@ def results_frame(rows: list[dict]) -> pd.DataFrame:
     df = pd.DataFrame(rows)
     order = ["model", "substation", "horizon_h", "MAE", "RMSE", "MASE",
              "MAPE", "peak_MAE", "peak_RMSE", "underestimation_rate",
-             "bias_pvalue", "biased_low", "peak_definition", "n", "n_peak"]
+             "bias_pvalue", "biased_low", "peak_definition", "n",
+             "n_peak_quantile", "n_peak_window"]
     return df[[c for c in order if c in df.columns]]

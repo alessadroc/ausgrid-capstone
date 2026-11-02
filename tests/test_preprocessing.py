@@ -111,6 +111,89 @@ def test_missing_unit_column_is_tolerated():
     assert (out["Unit"] == "MW").all()
 
 
+def fy2024_wide(days=3):
+    """End-labelled export whose closing column is headed '00:00', not '24:00',
+    and sits last - the layout of every FY2024 file in the archive."""
+    return make_wide(days=days).rename(columns={"24:00": "00:00"})
+
+
+def test_trailing_0000_is_the_closing_interval():
+    """Read as the opening of the day, the trailing 00:00 flipped whole files
+    to start-labelling and stamped each day's closing reading 24h early."""
+    wide = fy2024_wide()
+    tcols = [c for c in wide.columns if ingest.TIME_PATTERN.match(c)]
+    assert tcols[-1] == "00:00"
+    minutes = list(ingest.interval_map(wide).values())
+    assert ingest.detect_labelling(minutes) == "end"
+    assert max(minutes) == 1440 and 0 not in minutes
+
+
+def test_fy2024_layout_matches_standard_end_labelling():
+    cfg = Config(verbose=False)
+    expected = ingest.file_to_long(cfg, make_wide(), "fy23.csv")
+    out = ingest.file_to_long(cfg, fy2024_wide(), "fy24.csv")
+    pd.testing.assert_series_equal(out["timestamp"], expected["timestamp"])
+    pd.testing.assert_series_equal(out["load_mw"], expected["load_mw"])
+    # The closing reading of 1 Jan belongs to 1 Jan 23:45, not 1 Jan 00:00
+    closing = make_wide().loc[0, "24:00"]
+    row = out[out["load_mw"] == closing]
+    assert row["timestamp"].tolist() == [pd.Timestamp("2024-01-01 23:45")]
+
+
+def test_leading_0000_stays_start_labelled():
+    """The inverse case: a genuine start-labelled export, 00:00 first."""
+    wide = make_wide(labelling="start")
+    tcols = [c for c in wide.columns if ingest.TIME_PATTERN.match(c)]
+    assert tcols[0] == "00:00"
+    assert ingest.detect_labelling(list(ingest.interval_map(wide).values())) == "start"
+
+
+def test_trailing_0000_alongside_2400_is_not_remapped():
+    """With a real 24:00 present, a trailing 00:00 is not the closing interval."""
+    wide = make_wide()
+    wide["00:00"] = 0.0
+    assert 0 in ingest.interval_map(wide).values()
+
+
+def test_trailing_0000_after_a_gap_is_not_remapped():
+    """Only remap when the previous label is one interval before midnight."""
+    wide = fy2024_wide().drop(columns=["23:45"])
+    assert 0 in ingest.interval_map(wide).values()
+
+
+def test_trailing_0000_respects_resolution():
+    """At 30-minute resolution the label before the closing one is 23:30."""
+    wide = make_wide(resolution=30).rename(columns={"24:00": "00:00"})
+    minutes = list(ingest.interval_map(wide).values())
+    assert max(minutes) == 1440 and ingest.detect_labelling(minutes) == "end"
+
+
+def test_blank_day_placeholder_is_missing():
+    """A blank day exported with a lone 0.0 is not a measurement."""
+    cfg = Config(verbose=False)
+    wide = make_wide(days=3)
+    tcols = [c for c in wide.columns if ingest.TIME_PATTERN.match(c)]
+    wide[tcols] += 1                     # make_wide's first reading is 0.0
+    wide.loc[1, tcols] = np.nan
+    wide.loc[1, "24:00"] = 0.0
+    out = ingest.file_to_long(cfg, wide, "blank.csv")
+    assert not (out["load_mw"] == 0).any()
+    assert not out["timestamp"].dt.date.eq(pd.Timestamp("2024-01-02").date()).any()
+    assert len(out) == 2 * len(tcols)
+
+
+def test_genuine_zero_readings_are_kept():
+    """Zeros inside an otherwise populated day are real readings."""
+    cfg = Config(verbose=False)
+    wide = make_wide(days=2)
+    tcols = [c for c in wide.columns if ingest.TIME_PATTERN.match(c)]
+    wide[tcols] += 1                     # make_wide's first reading is 0.0
+    wide.loc[0, "12:00"] = 0.0
+    wide.loc[1, ["12:00", "12:15"]] = 0.0
+    out = ingest.file_to_long(cfg, wide, "zeros.csv")
+    assert (out["load_mw"] == 0).sum() == 3
+
+
 def test_start_and_end_labelling_align():
     """A start-labelled file and an end-labelled file covering the same day
     must produce timestamps on the same grid, not offset by one interval."""

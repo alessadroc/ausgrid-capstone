@@ -18,7 +18,8 @@ Three properties of the real published data drive the design here:
     dataset that is over 100x more parsing than necessary, slow enough to look
     like a hang.
 
-Nothing downstream depends on physical column order.
+Nothing downstream depends on physical column order, with one exception:
+a trailing '00:00' column is the closing 24:00 interval (see interval_map).
 """
 
 from __future__ import annotations
@@ -80,11 +81,34 @@ def canonical_label(label) -> str | None:
 
 
 def interval_map(df: pd.DataFrame) -> dict:
-    """Map each interval column in this frame to minutes-from-midnight."""
+    """Map each interval column in this frame to minutes-from-midnight.
+
+    The FY2024 exports write the closing interval as '00:00' rather than
+    '24:00', as the LAST time column after 23:45. Read literally it would be
+    the opening of the same day, flipping the whole file to start-labelling
+    and stamping each day's closing reading 24 hours early. A 00:00 column is
+    read as 24:00 only when all of these hold, so the rule cannot fire on a
+    genuine start-labelled export (which puts 00:00 first):
+
+      * it is the last interval column in header order
+      * the file has no 24:00 column
+      * the next-largest label is exactly one interval before midnight
+
+    Checked against the data: in every FY2024 file the trailing value joins
+    23:45 of its own row to 00:15 of the next row with a step smaller than a
+    typical 15-minute change, and two to three times smaller than the step
+    implied by reading it as the opening of its own row.
+    """
     mapping = {c: label_minutes(c) for c in df.columns}
     mapping = {c: m for c, m in mapping.items() if m is not None}
     if not mapping:
         raise ValueError("No HH:MM interval columns found - check the header row.")
+
+    last = list(mapping)[-1]
+    others = [m for c, m in mapping.items() if c != last]
+    if (mapping[last] == 0 and others and 24 * 60 not in others
+            and max(others) == 24 * 60 - detect_resolution(others)):
+        mapping[last] = 24 * 60
     return dict(sorted(mapping.items(), key=lambda kv: kv[1]))
 
 
@@ -225,6 +249,18 @@ def file_to_long(cfg: Config, raw: pd.DataFrame, source: str = "") -> pd.DataFra
 
     long_df["load_mw"] = pd.to_numeric(long_df["load_mw"], errors="coerce")
     long_df = long_df.dropna(subset=["load_mw"])
+
+    # A day with no data is exported as a blank row carrying a lone 0.0,
+    # usually in the closing column. Kept, it becomes an isolated 0 MW hour
+    # between imputed values - a spike Gaussian models pay heavily for and
+    # that is not a measurement. Treat it as missing so it is imputed and
+    # flagged like the rest of that day.
+    per_day = long_df.groupby(["Zone Substation", "_date"])["load_mw"].transform("size")
+    placeholder = (per_day == 1) & (long_df["load_mw"] == 0)
+    if placeholder.any():
+        log(cfg, "ingest", f"{source}: {int(placeholder.sum())} blank-day "
+                           f"0.0 placeholders treated as missing")
+        long_df = long_df[~placeholder]
     if long_df.empty:
         return long_df
 

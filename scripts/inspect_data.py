@@ -27,12 +27,9 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from ausgrid_pipeline import ingest  # noqa: E402
+
 TIME_PATTERN = re.compile(r"^\s*(\d{1,2}):([0-5]\d)\s*$")
-
-
-def minutes(label):
-    m = TIME_PATTERN.match(str(label))
-    return int(m.group(1)) * 60 + int(m.group(2)) if m else None
 
 
 def main():
@@ -72,7 +69,8 @@ def main():
             problems.append(f"{p.name}: no time columns in header")
             continue
 
-        mins = sorted(minutes(c) for c in tcols)
+        # Same mapping as the pipeline, so a trailing 00:00 reads as 24:00
+        mins = sorted(ingest.interval_map(head[tcols]).values())
         colcounts[len(tcols)] += 1
 
         # resolution from modal gap

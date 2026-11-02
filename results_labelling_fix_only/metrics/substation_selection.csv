@@ -1,0 +1,4 @@
+substation,mean_mw,max_mw,n_hours,min_mw,imputed_frac,outlier_frac,reverse_flow_frac,stratum,selection_rule
+Telarah 33_11kV,4.021058,17.079361,20400,-2.417275,0.02857843137254902,0.003284313725490196,0.044754904,small,"median mean-load site within its tercile, among substations with >=95% coverage and <=5% imputed hours"
+Hurstville North 132_11kV,10.074894,25.705,20400,0.0,0.03553921568627451,0.0008333333333333334,0.0,medium,"median mean-load site within its tercile, among substations with >=95% coverage and <=5% imputed hours"
+West Gosford 132_11kV,20.460115,53.4631,20400,0.0,0.030931372549019606,0.000784313725490196,0.0,large,"median mean-load site within its tercile, among substations with >=95% coverage and <=5% imputed hours"
